@@ -59,3 +59,7 @@ Implementing chat rooms with multiple users.
   * Authorization - Users can signup, and access their accounts.
   * Encryption and messaging - Messages can be successfully encrypted, transmitted, and decrypted.
   * Database - User accounts can be successfully created and accessed.
+
+## UML, User Stories, and Database Outline
+
+![UML-user-stories-database](./img/UML-user-stories-database.jpg)

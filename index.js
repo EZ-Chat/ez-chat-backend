@@ -13,6 +13,7 @@ ezchat.on('connection', (socket) => {
   socket.on('join', (payload) => {
     for (const room of payload.rooms) {
       socket.join(room);
+      ezchat.to(room).emit('syncRequest',{room});
     }
   });
 
@@ -20,8 +21,8 @@ ezchat.on('connection', (socket) => {
     ezchat.to(payload.room).emit('message', payload);
   });
 
-  // socket.on('in-transit', (payload) => {
-  //   socket.join(orderId);
-  //   ezchat.to(orderId).emit('delivered', payload);
-  // });
+  socket.on('received', (payload) => {
+    ezchat.to(payload.room).emit('received', payload);
+  })
+
 });

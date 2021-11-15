@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/EZ-Chat/ez-chatServer/issues"
   },
-  "homepage": "https://github.com/EZ-Chat/ez-chatServer#readme"
+  "homepage": "https://github.com/EZ-Chat/ez-chatServer#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0"
+  }
 }

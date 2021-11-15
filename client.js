@@ -1,22 +1,28 @@
 'use strict';
 
 const client = require('socket.io-client');
-const faker = require('faker');
 
-const vendorClient = client('http://localhost:3001/caps');
+const user = client('http://localhost:3001/ezchat');
 
-// client('http://localhost:3030');
+const rooms = []; //fs stuff
 
-const pickup = (store) => {
-  const payload = {
-    store,
-    orderId: faker.random.alphaNumeric(15),
-    customer: faker.name.findName(),
-    address: faker.address.streetAddress(),
-  };
-  vendorClient.emit('pickup', payload);
+const payload = {
+  rooms,
 };
 
-pickup('1-800-sendit');
+user.emit('join', payload);
 
-vendorClient.on('delivered', (payload) => console.log('Thanks you for delivering', payload.orderId));
+const send = (messageData) => {
+  const payload = {
+    username, //fs stuff
+    message: messageData.message,
+    room: messageData.room, // fs stuff
+  };
+  user.emit('send', payload);
+};
+
+user.on('message', (payload) => {
+  if (!payload.username === username) {
+    // Logic
+  }
+});

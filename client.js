@@ -1,42 +1,30 @@
 'use strict';
 
-require('dotenv');
+require('dotenv').config();
 const fs = require('fs');
 const client = require('socket.io-client');
 const user = client('http://localhost:3001/ezchat');
 const authUser = require('./components/authenticateUser.js');
+const { getUserData, saveUserData } = require('./components/dataStore');
 
 //authentication stuff
-let clientUsername = process.env.username;
-let clientPassword = process.env.password;
+const clientUsername = process.env.USERNAME;
+const clientPassword = process.env.PASSWORD;
 
-//fs stuff
-let rooms = []; //fs stuff
-let messageQueue = {}; //fs stuff
-let messageHistory = [];
 
-let userData = {
-  username: '',
-  rooms: [],
-  messageQueue: {},
-  messageHistory: [],
-};
-// const localFolder = '/localStore';
 
 // on authentication
-try {
-  // if (!fs.existsSync(localFolder)) fs.mkdirSync(localFolder);
-  const userJson = fs.readFileSync(`userData-${clientUsername}.json`);
-  parsedUserData = JSON.parse(userJson);
-  for (const key in userData) {
-    if (key in parsedUserData) {
-      userData[key] = parsedUserData[key];
-    }
-    console.log(userData)
-  }
-} catch (err) {
-  console.error(err);
-}
+// ....stuff happens
+
+let rooms = []; // <- replace with returned user data from auth
+
+let userData = getUserData({
+  username: clientUsername,
+  password: clientPassword,
+});
+
+//fs stuff
+let { messageQueue, messageHistory } = userData;
 
 const payload = {
   rooms,
@@ -89,4 +77,13 @@ user.on('received', (payload) => {
   }
 })
 
-fs.writeFileSync(`userData-${clientUsername}.json`, JSON.stringify(userData));
+let userDataToSave = {
+  username: clientUsername,
+  password: clientPassword,
+  parsedUserData: {
+    messageQueue,
+    messageHistory
+  }
+}
+
+saveUserData(userDataToSave);

@@ -31,7 +31,6 @@ const getUserData = (user) => {
       }
     });
 
-    console.log("User Data", userData)
     return userData;
   } catch (err) {
     console.error(err);

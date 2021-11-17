@@ -26,3 +26,11 @@ ezchat.on('connection', (socket) => {
   })
 
 });
+
+
+
+const friend = await User.findOne({friendCode});
+user.friendList.push({
+    friend
+})
+const savedUser = user.save();

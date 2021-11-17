@@ -22,61 +22,60 @@ let userData = getUserData({
   username: clientUsername,
   password: clientPassword,
 });
-console.log("userData: ", userData, "<-----------------")
 
 //fs stuff
 let { messageQueue, messageHistory } = userData;
 
-// const payload = {
-//   rooms,
-// };
+const payload = {
+  rooms,
+};
 
-// user.emit('join', payload);
+user.emit('join', payload);
 
-// const send = (messageData) => {
-//   const { message, room } = messageData;
+const send = (messageData) => {
+  const { message, room } = messageData;
 
-//   messageQueue[room].push(message)
-//   const payload = {
-//     username: clientUsername, //fs stuff
-//     message,
-//     room, // fs stuff
-//   };
-//   user.emit('send', payload);
-// };
+  messageQueue[room].push(message)
+  const payload = {
+    username: clientUsername, //fs stuff
+    message,
+    room, // fs stuff
+  };
+  user.emit('send', payload);
+};
 
-// user.on('syncRequest', (payload) => {
-//   const { room } = payload;
+user.on('syncRequest', (payload) => {
+  const { room } = payload;
 
-//   for (const message of messageQueue[room]) {
-//     emit('send', {
-//       username,
-//       message,
-//       room
-//     })
-//   }
-// })
+  for (const message of messageQueue[room]) {
+    emit('send', {
+      username,
+      message,
+      room
+    })
+  }
+})
 
-// user.on('message', (payload) => {
-//   if (!payload.username === username) {
-//     const { message, messageTime } = payload;
-//     messageHistory.push({
-//       message,
-//       username,
-//       dateTime: messageTime
-//     });
-//     console.log(message);
-//     user.emit('received', payload);
-//   }
-// });
+user.on('message', (payload) => {
+  if (!payload.username === username) {
+    const { message, messageTime } = payload;
+    messageHistory.push({
+      message,
+      username,
+      dateTime: messageTime
+    });
+    console.log(message);
+    user.emit('received', payload);
+  }
+});
 
-// user.on('received', (payload) => {
-//   const { message, username, room } = payload;
-//   if (username === clientUsername) {
-//     const messagePosition = messageQueue[room].indexOf(message);
-//     if (messagePosition > 0) messageQueue[room].slice(messagePosition, 1);
-//   }
-// })
+user.on('received', (payload) => {
+  const { message, username, room } = payload;
+  if (username === clientUsername) {
+    const messagePosition = messageQueue[room].indexOf(message);
+    if (messagePosition > 0) messageQueue[room].slice(messagePosition, 1);
+  }
+})
 
 let userDataToSave = {
   username: clientUsername,
@@ -86,5 +85,4 @@ let userDataToSave = {
     messageHistory
   }
 }
-console.log('bybybybybybybyby')
 saveUserData(userDataToSave);

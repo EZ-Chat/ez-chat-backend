@@ -3,11 +3,11 @@
 // const PLATFORM = process.platform;
 // console.log("Platform: ", PLATFORM);
 
-const fs = require('fs').promises;
+const fs = require('fs');
 const client = require('socket.io-client');
 
 // on authentication
-const getUserData = async (user) => {
+const getUserData = (user) => {
   const { username, password } = user;
   let userData = {
     username,
@@ -17,13 +17,20 @@ const getUserData = async (user) => {
 
 
   try {
-    const userJson = await fs.readFile(`userData-${username}.json`);
-    let parsedUserData = JSON.parse(userJson);
-    for (const key in userData) {
-      if (key in parsedUserData) {
-        userData[key] = parsedUserData[key];
+    fs.readFile(`userData-${username}.json`, (err, data) => {
+      if(err) {
+        if (err.code === 'ENOENT') {
+          return userData;
+        }
       }
-    }
+      let parsedUserData = JSON.parse(data);
+      for (const key in userData) {
+        if (key in parsedUserData) {
+          userData[key] = parsedUserData[key];
+        }
+      }
+    });
+
     console.log("User Data", userData)
     return userData;
   } catch (err) {
@@ -31,10 +38,14 @@ const getUserData = async (user) => {
   }
 }
 
-const saveUserData = async ( payload ) => {
+const saveUserData = ( payload ) => {
   const { username, password, parsedUserData } = payload;
+  console.log("parsedUserData",parsedUserData)
   try {
-    await fs.writeFile(`userData-${username}.json`, JSON.stringify(parsedUserData));
+    fs.writeFile(`userData-${username}.json`, JSON.stringify(parsedUserData), (err) => {
+      if (err) throw err;
+      console.log('The file has been saved!');
+    });
   } catch (err) {
     console.error(err);
   }

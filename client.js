@@ -10,6 +10,7 @@ const base64 = require('base-64');
 //authentication stuff
 const username = "testUser01";
 const password = "testPassword01";
+// const DB_SERVER_URL = process.env.DB_SERVER_URL_DEV;
 const DB_SERVER_URL = process.env.DB_SERVER_URL;
 const loginData = {
   username,
@@ -24,7 +25,8 @@ axios.post(`${DB_SERVER_URL}/signin`, {}, {
 })
 .then( response => {
   const { token, rooms } = response.data.userInfo;
-  const user = client(`http://localhost:${PORT}/ezchat`);
+  const user = client(`https://ez-chat-server.herokuapp.com/ezchat`);
+  // const user = client(`http://localhost:${PORT}/ezchat`);
 
   let userData = getUserData(loginData);
   let { messageQueue, messageHistory } = userData;
@@ -53,6 +55,7 @@ axios.post(`${DB_SERVER_URL}/signin`, {}, {
   })
   
   user.on('message', (payload) => {
+    console.log("Payload: ",payload, "<-----------------------")
     if (!(payload.username === username)) {
       const { message, messageTime } = payload;
       messageHistory.push({
@@ -60,8 +63,18 @@ axios.post(`${DB_SERVER_URL}/signin`, {}, {
         username: payload.username,
         dateTime: messageTime
       });
-      console.log(message);
+      console.log("Payload: ",payload, "<-----------------------")
+      console.log("Received: ", message);
       user.emit('received', payload);
+      let userDataToSave = {
+        username,
+        password,
+        parsedUserData: {
+          messageQueue,
+          messageHistory
+        }
+      }
+      saveUserData(userDataToSave);
     }
   });
   
@@ -69,19 +82,10 @@ axios.post(`${DB_SERVER_URL}/signin`, {}, {
     const { message, username, room } = payload;
     if (username === loginData.username) {
       const messagePosition = messageQueue[room].indexOf(message);
-      if (messagePosition > 0) messageQueue[room].slice(messagePosition, 1);
+      if (messagePosition > -1) messageQueue[room].slice(messagePosition, 1);
     }
   })
   
-  let userDataToSave = {
-    username,
-    password,
-    parsedUserData: {
-      messageQueue,
-      messageHistory
-    }
-  }
-
   const send = (messageData) => {
     const { message, room } = messageData;
   
@@ -92,12 +96,29 @@ axios.post(`${DB_SERVER_URL}/signin`, {}, {
       room,
     };
     user.emit('send', payload);
+    let userDataToSave = {
+      username,
+      password,
+      parsedUserData: {
+        messageQueue,
+        messageHistory
+      }
+    }
+    saveUserData(userDataToSave);
   };
 
   //testing messaging capabilities
   setInterval(function(){send({message:"A message from 1 to 2.", room:rooms[0]})},1000)
 
   user.on('disconnect', () => {
+    let userDataToSave = {
+      username,
+      password,
+      parsedUserData: {
+        messageQueue,
+        messageHistory
+      }
+    }
     saveUserData(userDataToSave);
   })
 })

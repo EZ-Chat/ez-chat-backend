@@ -5,10 +5,6 @@ const PORT = process.env.PORT || 3030;
 const server = socketio(PORT);
 const ezchat = server.of('/ezchat');
 
-ezchat.use((socket, next) => {
-  const token = socket.handshake.auth.token;
-});
-
 ezchat.on('connection', (socket) => {
   console.log(`${socket.id} connected to ezchat server`);
 

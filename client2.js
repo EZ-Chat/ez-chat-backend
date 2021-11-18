@@ -10,6 +10,7 @@ const base64 = require('base-64');
 //authentication stuff
 const username = "testUser02";
 const password = "testPassword02";
+// const DB_SERVER_URL = process.env.DB_SERVER_URL_DEV;
 const DB_SERVER_URL = process.env.DB_SERVER_URL;
 const loginData = {
   username,
@@ -24,7 +25,8 @@ axios.post(`${DB_SERVER_URL}/signin`, {}, {
 })
 .then( response => {
   const { token, rooms } = response.data.userInfo;
-  const user = client(`http://localhost:${PORT}/ezchat`);
+  const user = client(`https://ez-chat-server.herokuapp.com/ezchat`);
+  // const user = client(`http://localhost:${PORT}/ezchat`);
   let userData = getUserData(loginData);
   let { messageQueue, messageHistory } = userData;
 
@@ -59,8 +61,18 @@ axios.post(`${DB_SERVER_URL}/signin`, {}, {
         username: payload.username,
         dateTime: messageTime
       });
-      console.log(message);
+      console.log("Payload: ",payload, "<-----------------------")
+      console.log("Received: ", message);
       user.emit('received', payload);
+      let userDataToSave = {
+        username,
+        password,
+        parsedUserData: {
+          messageQueue,
+          messageHistory
+        }
+      }
+      saveUserData(userDataToSave);
     }
   });
   
@@ -68,18 +80,10 @@ axios.post(`${DB_SERVER_URL}/signin`, {}, {
     const { message, username, room } = payload;
     if (username === loginData.username) {
       const messagePosition = messageQueue[room].indexOf(message);
-      if (messagePosition > 0) messageQueue[room].slice(messagePosition, 1);
+      if (messagePosition > -1) messageQueue[room].slice(messagePosition, 1);
     }
   })
   
-  let userDataToSave = {
-    username,
-    password,
-    parsedUserData: {
-      messageQueue,
-      messageHistory
-    }
-  }
 
   const send = (messageData) => {
     const { message, room } = messageData;
@@ -94,9 +98,19 @@ axios.post(`${DB_SERVER_URL}/signin`, {}, {
   };
 
   //testing messaging capabilities
-  setInterval(function(){send({message:"A message from 2 to 1.", room:rooms[0]})},25000)
+  setInterval(function(){send({message:"A message from 2 to 1.", room:rooms[0]})},5000)
 
-  saveUserData(userDataToSave);
+  user.on('disconnect', () => {
+    let userDataToSave = {
+      username,
+      password,
+      parsedUserData: {
+        messageQueue,
+        messageHistory
+      }
+    }
+    saveUserData(userDataToSave);
+  })
 })
 .catch(error => console.log);
 

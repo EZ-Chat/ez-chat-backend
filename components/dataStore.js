@@ -31,7 +31,6 @@ const getUserData = (user) => {
       }
     });
 
-    console.log("User Data", userData)
     return userData;
   } catch (err) {
     console.error(err);
@@ -40,7 +39,6 @@ const getUserData = (user) => {
 
 const saveUserData = ( payload ) => {
   const { username, password, parsedUserData } = payload;
-  console.log("parsedUserData",parsedUserData)
   try {
     fs.writeFile(`userData-${username}.json`, JSON.stringify(parsedUserData), (err) => {
       if (err) throw err;

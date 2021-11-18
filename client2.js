@@ -8,8 +8,8 @@ const PORT = process.env.PORT || 3030;
 const base64 = require('base-64');
 
 //authentication stuff
-const username = "testUser01";
-const password = "testPassword01";
+const username = "testUser02";
+const password = "testPassword02";
 const DB_SERVER_URL = process.env.DB_SERVER_URL;
 const loginData = {
   username,
@@ -25,7 +25,6 @@ axios.post(`${DB_SERVER_URL}/signin`, {}, {
 .then( response => {
   const { token, rooms } = response.data.userInfo;
   const user = client(`http://localhost:${PORT}/ezchat`);
-
   let userData = getUserData(loginData);
   let { messageQueue, messageHistory } = userData;
 
@@ -95,11 +94,9 @@ axios.post(`${DB_SERVER_URL}/signin`, {}, {
   };
 
   //testing messaging capabilities
-  setInterval(function(){send({message:"A message from 1 to 2.", room:rooms[0]})},1000)
+  setInterval(function(){send({message:"A message from 2 to 1.", room:rooms[0]})},25000)
 
-  user.on('disconnect', () => {
-    saveUserData(userDataToSave);
-  })
+  saveUserData(userDataToSave);
 })
 .catch(error => console.log);
 
